@@ -42,6 +42,7 @@
             cursor: grab;
             touch-action: none;
             padding: 20px;
+            transform: scale(5); /* 初始缩放500% */
         }
 
         #flowchart:active {
@@ -67,6 +68,7 @@
             color: white;
             border: none;
             border-radius: 3px;
+            font-size: 16px;
         }
 
         .zoom-controls button:hover {
@@ -76,6 +78,7 @@
         .zoom-level {
             display: inline-block;
             margin: 0 10px;
+            font-size: 16px;
         }
 
         /* 移动端优化 */
@@ -111,7 +114,7 @@
         <h1>HybridMedNet 系统架构图</h1>
         <div class="zoom-controls">
             <button onclick="zoomIn()">放大</button>
-            <span class="zoom-level">100%</span>
+            <span class="zoom-level">500%</span>
             <button onclick="zoomOut()">缩小</button>
             <button onclick="resetZoom()">重置</button>
         </div>
@@ -197,7 +200,7 @@
             }
         });
 
-        let currentZoom = 1;
+        let currentZoom = 5; // 初始缩放500%
         let isDragging = false;
         let startX, startY, scrollLeft, scrollTop;
         let lastTouchDistance = 0;
@@ -244,8 +247,8 @@
                 const newDistance = getTouchDistance(e.touches);
                 const delta = newDistance - lastTouchDistance;
                 if (Math.abs(delta) > 1) {
-                    const zoomDelta = delta > 0 ? 0.02 : -0.02;
-                    currentZoom = Math.min(Math.max(currentZoom + zoomDelta, 0.3), 3);
+                    const zoomDelta = delta > 0 ? 0.1 : -0.1;
+                    currentZoom = Math.max(currentZoom + zoomDelta, 0.1); // 只设置最小值0.1
                     updateZoomLevel();
                     lastTouchDistance = newDistance;
                 }
@@ -260,21 +263,19 @@
         }
 
         function zoomIn() {
-            if (currentZoom < 3) {
-                currentZoom += 0.1;
-                updateZoomLevel();
-            }
+            currentZoom += 0.5; // 每次放大50%
+            updateZoomLevel();
         }
 
         function zoomOut() {
-            if (currentZoom > 0.3) {
-                currentZoom -= 0.1;
+            if (currentZoom > 0.1) { // 最小缩放10%
+                currentZoom -= 0.5;
                 updateZoomLevel();
             }
         }
 
         function resetZoom() {
-            currentZoom = 1;
+            currentZoom = 5; // 重置为500%
             updateZoomLevel();
             // 重置位置
             flowchart.style.left = '0px';
@@ -302,6 +303,9 @@
         document.addEventListener('gesturestart', function(e) {
             e.preventDefault();
         });
+
+        // 初始化显示缩放级别
+        updateZoomLevel();
     </script>
 </body>
 </html>
