@@ -10,25 +10,28 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            font-family: Arial, sans-serif;
         }
         
         .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
+            width: 100vw;
+            height: 100vh;
             padding: 10px;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
             text-align: center;
             margin: 10px 0;
+            font-size: 24px;
         }
 
         #flowchart-container {
-            position: relative;
+            flex: 1;
             width: 100%;
-            height: 90vh;
+            position: relative;
             touch-action: none;
             overflow: hidden;
             border: 1px solid #ddd;
@@ -36,17 +39,19 @@
             background: #fff;
         }
 
-        #flowchart {
-            position: absolute;
-            transform-origin: 0 0;
-            cursor: grab;
-            touch-action: none;
-            padding: 20px;
-            transform: scale(5); /* 初始缩放500% */
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
         }
 
-        #flowchart:active {
-            cursor: grabbing;
+        .mermaid svg {
+            max-width: 100% !important;
+            max-height: 100% !important;
+            height: auto !important;
+            width: auto !important;
         }
 
         .zoom-controls {
@@ -61,7 +66,7 @@
         }
 
         .zoom-controls button {
-            padding: 5px 10px;
+            padding: 8px 15px;
             margin: 0 5px;
             cursor: pointer;
             background: #4CAF50;
@@ -81,14 +86,9 @@
             font-size: 16px;
         }
 
-        /* 移动端优化 */
         @media (max-width: 768px) {
-            .container {
-                padding: 5px;
-            }
-            
             h1 {
-                font-size: 1.5em;
+                font-size: 20px;
             }
             
             .zoom-controls {
@@ -98,13 +98,8 @@
             }
             
             .zoom-controls button {
-                padding: 8px 15px;
-                margin: 0 2px;
+                padding: 6px 12px;
                 font-size: 14px;
-            }
-            
-            .zoom-level {
-                margin: 0 5px;
             }
         }
     </style>
@@ -114,102 +109,111 @@
         <h1>HybridMedNet 系统架构图</h1>
         <div class="zoom-controls">
             <button onclick="zoomIn()">放大</button>
-            <span class="zoom-level">2500%</span>
+            <span class="zoom-level">100%</span>
             <button onclick="zoomOut()">缩小</button>
             <button onclick="resetZoom()">重置</button>
         </div>
         <div id="flowchart-container">
-            <div id="flowchart">
-                <pre class="mermaid">
-                    graph TD
-                    A[HybridMedNet] --> B[多模态感知与融合]
-                    A --> C[智能镜头控制系统]
-                    A --> D[跨模态协同决策]
-                    
-                    B --> E[视觉识别模块]
-                    B --> F[手势识别系统]
-                    B --> G[语音控制模块]
-                    
-                    C --> H[自适应焦距调节]
-                    C --> I[智能取景系统]
-                    
-                    D --> J[多模态特征融合]
-                    D --> K[智能诊断推理]
-                    
-                    E --> L[多尺度特征提取]
-                    E --> M[注意力增强机制]
-                    E --> N[层次化识别策略]
-                    
-                    F --> O[3D骨骼追踪]
-                    F --> P[时序动作理解]
-                    F --> Q[上下文感知交互]
-                    
-                    G --> R[实时语音识别]
-                    G --> S[自然语言理解]
-                    G --> T[多语言支持]
-                    
-                    H --> U[基于深度估计的自动对焦]
-                    H --> V[目标追踪稳定控制]
-                    
-                    I --> W[关键区域自动定位]
-                    I --> X[动态构图优化]
-                    
-                    J --> Y[异构特征对齐]
-                    J --> Z[动态权重分配]
-                    
-                    K --> AA[基于知识图谱的推理]
-                    K --> AB[不确定性建模]
-                    K --> AC[可解释性决策]
+            <div class="mermaid">
+                graph TD
+                classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
+                classDef highlight fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
 
-                    subgraph 实现
-                        AD[多模态特征提取与融合]
-                        AE[自适应控制算法]
-                        AF[实时数据处理]
-                        AG[智能决策支持]
-                    end
-                    
-                    A --> AD
-                    A --> AE
-                    A --> AF
-                    A --> AG
-                    
-                    AD --> AH[使用卷积神经网络]
-                    AD --> AI[应用深度学习框架]
-                    
-                    AE --> AJ[PID控制算法]
-                    AE --> AK[自适应调节机制]
-                    
-                    AF --> AL[实时信号处理]
-                    AF --> AM[数据流优化]
-                    
-                    AG --> AN[基于规则的推理系统]
-                    AG --> AO[机器学习模型]
-                </pre>
+                A[HybridMedNet]:::highlight --> B[多模态感知与融合]
+                A --> C[智能镜头控制系统]
+                A --> D[跨模态协同决策]
+                
+                B --> E[视觉识别模块]
+                B --> F[手势识别系统]
+                B --> G[语音控制模块]
+                
+                C --> H[自适应焦距调节]
+                C --> I[智能取景系统]
+                
+                D --> J[多模态特征融合]
+                D --> K[智能诊断推理]
+                
+                E --> L[多尺度特征提取]
+                E --> M[注意力增强机制]
+                E --> N[层次化识别策略]
+                
+                F --> O[3D骨骼追踪]
+                F --> P[时序动作理解]
+                F --> Q[上下文感知交互]
+                
+                G --> R[实时语音识别]
+                G --> S[自然语言理解]
+                G --> T[多语言支持]
+                
+                H --> U[基于深度估计的自动对焦]
+                H --> V[目标追踪稳定控制]
+                
+                I --> W[关键区域自动定位]
+                I --> X[动态构图优化]
+                
+                J --> Y[异构特征对齐]
+                J --> Z[动态权重分配]
+                
+                K --> AA[基于知识图谱的推理]
+                K --> AB[不确定性建模]
+                K --> AC[可解释性决策]
+
+                subgraph 实现技术
+                    AD[多模态特征提取与融合]:::highlight
+                    AE[自适应控制算法]
+                    AF[实时数据处理]
+                    AG[智能决策支持]
+                end
+                
+                A --> AD
+                A --> AE
+                A --> AF
+                A --> AG
+                
+                AD --> AH[使用卷积神经网络]
+                AD --> AI[应用深度学习框架]
+                
+                AE --> AJ[PID控制算法]
+                AE --> AK[自适应调节机制]
+                
+                AF --> AL[实时信号处理]
+                AF --> AM[数据流优化]
+                
+                AG --> AN[基于规则的推理系统]
+                AG --> AO[机器学习模型]
             </div>
         </div>
     </div>
 
     <script>
+        // 配置 mermaid
         mermaid.initialize({
             startOnLoad: true,
             theme: 'default',
             flowchart: {
                 useMaxWidth: true,
                 htmlLabels: true,
-                curve: 'basis'
-            }
+                curve: 'basis',
+                rankSpacing: 150,
+                nodeSpacing: 150,
+                fontSize: 18
+            },
+            gantt: {
+                fontSize: 18
+            },
+            securityLevel: 'loose',
+            logLevel: 'error'
         });
 
-        let currentZoom = 5; // 初始缩放500%
+        let currentZoom = 1;
         let isDragging = false;
-        let startX, startY, scrollLeft, scrollTop;
+        let startX, startY;
         let lastTouchDistance = 0;
         
         const container = document.getElementById('flowchart-container');
-        const flowchart = document.getElementById('flowchart');
+        const flowchart = document.querySelector('.mermaid');
         const zoomLevelDisplay = document.querySelector('.zoom-level');
 
-        // 拖动功能
         function handleDragStart(e) {
             isDragging = true;
             const pos = e.type.includes('mouse') ? e : e.touches[0];
@@ -233,7 +237,6 @@
             flowchart.style.cursor = 'grab';
         }
 
-        // 触摸缩放功能
         function handleTouchStart(e) {
             if (e.touches.length === 2) {
                 e.preventDefault();
@@ -248,7 +251,7 @@
                 const delta = newDistance - lastTouchDistance;
                 if (Math.abs(delta) > 1) {
                     const zoomDelta = delta > 0 ? 0.1 : -0.1;
-                    currentZoom = Math.max(currentZoom + zoomDelta, 0.1); // 只设置最小值0.1
+                    currentZoom = Math.max(currentZoom + zoomDelta, 0.1);
                     updateZoomLevel();
                     lastTouchDistance = newDistance;
                 }
@@ -263,21 +266,20 @@
         }
 
         function zoomIn() {
-            currentZoom += 0.5; // 每次放大50%
+            currentZoom += 0.2;
             updateZoomLevel();
         }
 
         function zoomOut() {
-            if (currentZoom > 0.1) { // 最小缩放10%
-                currentZoom -= 0.5;
+            if (currentZoom > 0.2) {
+                currentZoom -= 0.2;
                 updateZoomLevel();
             }
         }
 
         function resetZoom() {
-            currentZoom = 5; // 重置为500%
+            currentZoom = 1;
             updateZoomLevel();
-            // 重置位置
             flowchart.style.left = '0px';
             flowchart.style.top = '0px';
         }
@@ -299,13 +301,20 @@
         container.addEventListener('touchstart', handleTouchStart, { passive: false });
         container.addEventListener('touchmove', handleTouchMove, { passive: false });
 
-        // 防止移动端双指缩放时触发浏览器默认缩放
         document.addEventListener('gesturestart', function(e) {
             e.preventDefault();
         });
 
-        // 初始化显示缩放级别
-        updateZoomLevel();
+        // 监听窗口大小变化，自动调整图表大小
+        window.addEventListener('resize', function() {
+            mermaid.init(undefined, '.mermaid');
+        });
+
+        // 初始化显示
+        document.addEventListener('DOMContentLoaded', function() {
+            mermaid.init(undefined, '.mermaid');
+            updateZoomLevel();
+        });
     </script>
 </body>
 </html>
