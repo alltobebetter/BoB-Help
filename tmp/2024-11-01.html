@@ -6,34 +6,59 @@
     <title>HybridMedNet 系统架构图</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <style>
-        .container {
-            width: 95%;
-            margin: 20px auto;
-            padding: 20px;
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 10px 0;
+        }
+
         #flowchart-container {
             position: relative;
             width: 100%;
-            min-height: 800px;
+            height: 90vh;
+            touch-action: none;
+            overflow: hidden;
             border: 1px solid #ddd;
             border-radius: 5px;
-            padding: 20px;
-            overflow: auto;
+            background: #fff;
         }
+
         #flowchart {
+            position: absolute;
             transform-origin: 0 0;
-            transition: transform 0.3s ease;
+            cursor: grab;
+            touch-action: none;
+            padding: 20px;
         }
+
+        #flowchart:active {
+            cursor: grabbing;
+        }
+
         .zoom-controls {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 10px;
+            right: 10px;
             background: white;
             padding: 10px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
         }
+
         .zoom-controls button {
             padding: 5px 10px;
             margin: 0 5px;
@@ -43,12 +68,41 @@
             border: none;
             border-radius: 3px;
         }
+
         .zoom-controls button:hover {
             background: #45a049;
         }
+
         .zoom-level {
             display: inline-block;
             margin: 0 10px;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .zoom-controls {
+                top: 5px;
+                right: 5px;
+                padding: 5px;
+            }
+            
+            .zoom-controls button {
+                padding: 8px 15px;
+                margin: 0 2px;
+                font-size: 14px;
+            }
+            
+            .zoom-level {
+                margin: 0 5px;
+            }
         }
     </style>
 </head>
@@ -144,25 +198,77 @@
         });
 
         let currentZoom = 1;
-        const zoomStep = 0.1;
+        let isDragging = false;
+        let startX, startY, scrollLeft, scrollTop;
+        let lastTouchDistance = 0;
+        
+        const container = document.getElementById('flowchart-container');
         const flowchart = document.getElementById('flowchart');
         const zoomLevelDisplay = document.querySelector('.zoom-level');
 
-        function updateZoomLevel() {
-            zoomLevelDisplay.textContent = Math.round(currentZoom * 100) + '%';
-            flowchart.style.transform = `scale(${currentZoom})`;
+        // 拖动功能
+        function handleDragStart(e) {
+            isDragging = true;
+            const pos = e.type.includes('mouse') ? e : e.touches[0];
+            startX = pos.pageX - flowchart.offsetLeft;
+            startY = pos.pageY - flowchart.offsetTop;
+            flowchart.style.cursor = 'grabbing';
+        }
+
+        function handleDragMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const pos = e.type.includes('mouse') ? e : e.touches[0];
+            const x = pos.pageX - startX;
+            const y = pos.pageY - startY;
+            flowchart.style.left = `${x}px`;
+            flowchart.style.top = `${y}px`;
+        }
+
+        function handleDragEnd() {
+            isDragging = false;
+            flowchart.style.cursor = 'grab';
+        }
+
+        // 触摸缩放功能
+        function handleTouchStart(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                lastTouchDistance = getTouchDistance(e.touches);
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const newDistance = getTouchDistance(e.touches);
+                const delta = newDistance - lastTouchDistance;
+                if (Math.abs(delta) > 1) {
+                    const zoomDelta = delta > 0 ? 0.02 : -0.02;
+                    currentZoom = Math.min(Math.max(currentZoom + zoomDelta, 0.3), 3);
+                    updateZoomLevel();
+                    lastTouchDistance = newDistance;
+                }
+            }
+        }
+
+        function getTouchDistance(touches) {
+            return Math.hypot(
+                touches[0].pageX - touches[1].pageX,
+                touches[0].pageY - touches[1].pageY
+            );
         }
 
         function zoomIn() {
-            if (currentZoom < 3) {  // 最大放大到300%
-                currentZoom += zoomStep;
+            if (currentZoom < 3) {
+                currentZoom += 0.1;
                 updateZoomLevel();
             }
         }
 
         function zoomOut() {
-            if (currentZoom > 0.3) {  // 最小缩小到30%
-                currentZoom -= zoomStep;
+            if (currentZoom > 0.3) {
+                currentZoom -= 0.1;
                 updateZoomLevel();
             }
         }
@@ -170,18 +276,31 @@
         function resetZoom() {
             currentZoom = 1;
             updateZoomLevel();
+            // 重置位置
+            flowchart.style.left = '0px';
+            flowchart.style.top = '0px';
         }
 
-        // 添加鼠标滚轮缩放支持
-        document.getElementById('flowchart-container').addEventListener('wheel', function(e) {
-            if (e.ctrlKey) {  // 只在按住Ctrl键时才触发缩放
-                e.preventDefault();
-                if (e.deltaY < 0) {
-                    zoomIn();
-                } else {
-                    zoomOut();
-                }
-            }
+        function updateZoomLevel() {
+            zoomLevelDisplay.textContent = Math.round(currentZoom * 100) + '%';
+            flowchart.style.transform = `scale(${currentZoom})`;
+        }
+
+        // 事件监听器
+        flowchart.addEventListener('mousedown', handleDragStart);
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('mouseup', handleDragEnd);
+        
+        flowchart.addEventListener('touchstart', handleDragStart);
+        flowchart.addEventListener('touchmove', handleDragMove);
+        flowchart.addEventListener('touchend', handleDragEnd);
+        
+        container.addEventListener('touchstart', handleTouchStart, { passive: false });
+        container.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+        // 防止移动端双指缩放时触发浏览器默认缩放
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
         });
     </script>
 </body>
