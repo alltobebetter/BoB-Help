@@ -122,7 +122,7 @@
             line-height: 1.8;
         }
 
-        /* Markdown 样式 */
+        /* Markdown 内容样式 */
         .markdown-content h1,
         .markdown-content h2,
         .markdown-content h3,
@@ -135,6 +135,15 @@
             margin: 1em 0;
         }
 
+        .markdown-content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1em 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
         .markdown-content code {
             background: var(--second);
             padding: 0.2em 0.4em;
@@ -142,11 +151,17 @@
             font-size: 0.9em;
         }
 
+        .markdown-content pre {
+            margin: 1em 0;
+            border-radius: 8px;
+            background: #f8f8f8;
+        }
+
         .markdown-content pre code {
             display: block;
             padding: 1em;
             overflow-x: auto;
-            background: #f8f8f8;
+            background: transparent;
         }
 
         .markdown-content blockquote {
@@ -154,6 +169,31 @@
             padding-left: 1em;
             margin: 1em 0;
             color: #666;
+            background: var(--second);
+            border-radius: 0 8px 8px 0;
+            padding: 1em 1em 1em 2em;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+        }
+
+        .markdown-content table th,
+        .markdown-content table td {
+            border: 1px solid #ddd;
+            padding: 0.5em;
+        }
+
+        .markdown-content table th {
+            background: var(--second);
         }
 
         /* 返回首页按钮 */
@@ -168,11 +208,30 @@
             text-decoration: none;
             box-shadow: 0 2px 8px rgba(214, 158, 73, 0.3);
             transition: all 0.3s ease;
+            z-index: 100;
         }
 
         .back-home:hover {
             background: var(--hover);
             transform: translateY(-2px);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .markdown-page {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .back-home {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.6rem 1.2rem;
+            }
         }
     </style>
 </head>
@@ -211,7 +270,8 @@
                 }
                 return hljs.highlightAuto(code).value;
             },
-            breaks: true
+            breaks: true,
+            gfm: true
         });
 
         // 路由处理
@@ -231,7 +291,12 @@
 
                 // 加载并解析Markdown文件
                 fetch(mdFile)
-                    .then(response => response.text())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('文件加载失败');
+                        }
+                        return response.text();
+                    })
                     .then(text => {
                         markdownContent.innerHTML = marked.parse(text);
                         // 代码高亮
@@ -240,7 +305,11 @@
                         });
                     })
                     .catch(error => {
-                        markdownContent.innerHTML = `<h1>错误</h1><p>无法加载文档: ${error}</p>`;
+                        markdownContent.innerHTML = `
+                            <h1>错误</h1>
+                            <p>无法加载文档: ${error.message}</p>
+                            <p>请确认文件路径是否正确。</p>
+                        `;
                     });
             }
         }
