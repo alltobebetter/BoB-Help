@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/b8b9ff8f-b509-4159-a636-eee144ca8f4a)# 如何更改更适合我的机器人模型
+# 如何更改更适合我的机器人模型
 
 ### 找到机器人选项
 
