@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- 引入代码高亮 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/lib/highlight.min.js"></script>
     <style>
         :root {
             --primary: #d69e49;
@@ -37,14 +37,22 @@
             width: 100%;
         }
 
+        /* 导航页样式 */
+        .home-page {
+            display: none;
+        }
+
+        .home-page.active {
+            display: block;
+        }
+
         h1 {
             text-align: center;
-            margin: 2rem 0;
+            margin: 3rem 0;
             font-weight: 600;
             color: var(--primary);
         }
 
-        /* 主页样式 */
         .links-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -95,31 +103,40 @@
             font-size: 0.9rem;
         }
 
-        /* Markdown 内容样式 */
-        .markdown-content {
+        /* Markdown 页面样式 */
+        .markdown-page {
+            display: none;
             background: white;
-            padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
             margin: 2rem auto;
             max-width: 900px;
-            line-height: 1.6;
         }
 
+        .markdown-page.active {
+            display: block;
+        }
+
+        .markdown-content {
+            line-height: 1.8;
+        }
+
+        /* Markdown 样式 */
         .markdown-content h1,
         .markdown-content h2,
         .markdown-content h3,
         .markdown-content h4 {
+            margin: 1.5em 0 0.8em;
             color: var(--primary);
-            margin: 1.5rem 0 1rem;
         }
 
         .markdown-content p {
-            margin-bottom: 1rem;
+            margin: 1em 0;
         }
 
         .markdown-content code {
-            background: #f6f8fa;
+            background: var(--second);
             padding: 0.2em 0.4em;
             border-radius: 3px;
             font-size: 0.9em;
@@ -129,47 +146,64 @@
             display: block;
             padding: 1em;
             overflow-x: auto;
-        }
-
-        .markdown-content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
+            background: #f8f8f8;
         }
 
         .markdown-content blockquote {
             border-left: 4px solid var(--primary);
-            padding-left: 1rem;
-            margin: 1rem 0;
+            padding-left: 1em;
+            margin: 1em 0;
             color: #666;
         }
 
-        /* 导航栏 */
-        .nav {
-            background: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .nav a {
-            color: var(--primary);
+        /* 返回首页按钮 */
+        .back-home {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
             text-decoration: none;
-            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(214, 158, 73, 0.3);
+            transition: all 0.3s ease;
         }
 
-        .nav a:hover {
-            color: var(--hover);
+        .back-home:hover {
+            background: var(--hover);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <div class="nav">
-        <a href="#/">首页</a>
+    <div class="container">
+        <!-- 主页 -->
+        <div class="home-page active">
+            <h1>文档导航</h1>
+            <div class="links-grid">
+                <div class="link-card">
+                    <a href="#/demo.md">
+                        <div class="link-icon">📝</div>
+                        <div class="link-content">
+                            <h3>示例文档</h3>
+                            <p>Markdown示例文档</p>
+                        </div>
+                    </a>
+                </div>
+                <!-- 更多链接卡片 -->
+            </div>
+        </div>
+
+        <!-- Markdown页面 -->
+        <div class="markdown-page">
+            <div class="markdown-content"></div>
+            <a href="#/" class="back-home">返回首页</a>
+        </div>
     </div>
-    <div class="container" id="app"></div>
 
     <script>
-        // Markdown 解析配置
+        // 配置 marked
         marked.setOptions({
             highlight: function(code, lang) {
                 if (lang && hljs.getLanguage(lang)) {
@@ -177,73 +211,44 @@
                 }
                 return hljs.highlightAuto(code).value;
             },
-            breaks: true,
-            gfm: true
+            breaks: true
         });
 
         // 路由处理
-        async function router() {
-            const hash = window.location.hash || '#/';
-            const app = document.getElementById('app');
+        function handleRoute() {
+            const hash = window.location.hash;
+            const homePage = document.querySelector('.home-page');
+            const markdownPage = document.querySelector('.markdown-page');
+            const markdownContent = document.querySelector('.markdown-content');
 
-            if (hash === '#/') {
-                // 显示主页
-                app.innerHTML = `
-                    <h1>文档导航</h1>
-                    <div class="links-grid">
-                        <div class="link-card">
-                            <a href="#/docs/guide.md">
-                                <div class="link-icon">📚</div>
-                                <div class="link-content">
-                                    <h3>使用指南</h3>
-                                    <p>快速上手指南</p>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="link-card">
-                            <a href="#/docs/api.md">
-                                <div class="link-icon">⚡</div>
-                                <div class="link-content">
-                                    <h3>API 文档</h3>
-                                    <p>接口使用说明</p>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="link-card">
-                            <a href="#/docs/examples.md">
-                                <div class="link-icon">🎯</div>
-                                <div class="link-content">
-                                    <h3>示例文档</h3>
-                                    <p>常见使用示例</p>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                `;
-            } else {
-                // 解析 Markdown 文件
-                try {
-                    const path = hash.slice(2); // 移除 '#/'
-                    const response = await fetch(path);
-                    if (!response.ok) throw new Error('文件不存在');
-                    const markdown = await response.text();
-                    const html = marked(markdown);
-                    app.innerHTML = `<div class="markdown-content">${html}</div>`;
-                } catch (error) {
-                    app.innerHTML = `
-                        <div class="markdown-content">
-                            <h1>404</h1>
-                            <p>找不到请求的文件: ${path}</p>
-                            <p><a href="#/">返回首页</a></p>
-                        </div>
-                    `;
-                }
+            if (hash === '' || hash === '#/') {
+                homePage.classList.add('active');
+                markdownPage.classList.remove('active');
+            } else if (hash.endsWith('.md')) {
+                const mdFile = hash.slice(2); // 移除 '#/'
+                homePage.classList.remove('active');
+                markdownPage.classList.add('active');
+
+                // 加载并解析Markdown文件
+                fetch(mdFile)
+                    .then(response => response.text())
+                    .then(text => {
+                        markdownContent.innerHTML = marked.parse(text);
+                        // 代码高亮
+                        document.querySelectorAll('pre code').forEach((block) => {
+                            hljs.highlightBlock(block);
+                        });
+                    })
+                    .catch(error => {
+                        markdownContent.innerHTML = `<h1>错误</h1><p>无法加载文档: ${error}</p>`;
+                    });
             }
         }
 
         // 监听路由变化
-        window.addEventListener('hashchange', router);
-        window.addEventListener('load', router);
+        window.addEventListener('hashchange', handleRoute);
+        // 初始加载
+        handleRoute();
     </script>
 </body>
 </html>
