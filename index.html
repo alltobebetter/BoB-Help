@@ -21,124 +21,120 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--second);
-            color: #333;
-            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
         }
 
         .container {
             max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
         }
 
         h1 {
             color: var(--primary);
+            text-align: center;
+            margin-bottom: 3rem;
             font-size: 2.5rem;
-            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary);
         }
 
         .file-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 1.5rem;
+            padding: 1rem;
         }
 
         .file-card {
             background: white;
+            border-radius: 12px;
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
         }
 
         .file-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .file-link {
-            text-decoration: none;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            box-shadow: 0 8px 15px rgba(214, 158, 73, 0.2);
         }
 
         .file-icon {
-            font-size: 1.5rem;
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 1rem;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
+        .file-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-info {
+            font-size: 0.9rem;
             color: #666;
+        }
+
+        @media (max-width: 600px) {
+            .file-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>文档导航</h1>
-            <p>浏览可用的 Markdown 文档</p>
-        </header>
-        <div id="file-list" class="file-grid">
-            <!-- 文件列表将通过 JavaScript 动态加载 -->
-        </div>
+        <h1>文档导航</h1>
+        <div class="file-grid" id="fileList"></div>
     </div>
 
-    <!-- 引入 marked.js 用于解析 Markdown -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        async function listMarkdownFiles() {
+        async function loadMarkdownFiles() {
             try {
-                const response = await fetch('.');
-                const text = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'text/html');
-                const links = Array.from(doc.getElementsByTagName('a'));
-                const markdownFiles = links
-                    .map(link => link.href)
-                    .filter(href => href.endsWith('.md'))
-                    .map(href => href.split('/').pop());
-
-                const fileList = document.getElementById('file-list');
+                const response = await fetch('/api/list-md');
+                const files = await response.json();
                 
-                if (markdownFiles.length === 0) {
-                    fileList.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-folder-open" style="font-size: 3rem; color: var(--primary);"></i>
-                            <p>暂无 Markdown 文件</p>
+                const fileList = document.getElementById('fileList');
+                files.forEach(file => {
+                    const card = document.createElement('a');
+                    card.href = file;
+                    card.className = 'file-card';
+                    
+                    const fileName = file.split('/').pop();
+                    card.innerHTML = `
+                        <div class="file-icon">
+                            <i class="fas fa-file-alt"></i>
                         </div>
+                        <div class="file-name">${fileName}</div>
+                        <div class="file-info">Markdown 文档</div>
                     `;
-                    return;
-                }
-
-                fileList.innerHTML = markdownFiles
-                    .map(filename => `
-                        <div class="file-card">
-                            <a href="${filename}" class="file-link">
-                                <i class="fas fa-file-alt file-icon"></i>
-                                <span>${filename}</span>
-                            </a>
-                        </div>
-                    `)
-                    .join('');
+                    
+                    fileList.appendChild(card);
+                });
             } catch (error) {
-                console.error('Error listing files:', error);
+                console.error('Error loading markdown files:', error);
             }
         }
 
-        // 页面加载时列出文件
-        window.addEventListener('load', listMarkdownFiles);
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', loadMarkdownFiles);
     </script>
 </body>
 </html>
